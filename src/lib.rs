@@ -139,6 +139,14 @@ pub fn distance_generic<D>(X: &ArrayView2<f64>, Y: &ArrayView2<f64>,
     let d = unsafe { emd(X.nrows(), weight_x.as_ptr(),
                          Y.nrows(), weight_y.as_ptr(),
                          cost.as_ptr(), null()) };
+
+    // Clean up memory allocated with Box::into_raw
+    unsafe {
+        for ptr in cost {
+            let _ = Box::from_raw(std::slice::from_raw_parts_mut(ptr as *mut c_double, Y.nrows()));
+        }
+    }
+
     d as f64
 }
 
